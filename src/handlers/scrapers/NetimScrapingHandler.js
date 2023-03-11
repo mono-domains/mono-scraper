@@ -1,9 +1,9 @@
 const { firefox } = require('playwright')
 const cheerio = require('cheerio')
 
-class PorkbunScrapingHandler {
+class NetimScrapingHandler {
   extensionPricingHandler = null
-  registrarUrl = 'https://porkbun.com/products/domains'
+  registrarUrl = 'https://www.netim.com/en/domain-name/extensions-list'
 
   constructor(extensionPricingHandler) {
     this.extensionPricingHandler = extensionPricingHandler
@@ -27,7 +27,7 @@ class PorkbunScrapingHandler {
     const page = await context.newPage()
     await page.goto(this.registrarUrl)
 
-    const pricingTable = await page.innerHTML('#domainsPricingAllExtensionsContainer')
+    const pricingTable = await page.innerHTML('.contour-tableau')
 
     await browser.close()
 
@@ -38,29 +38,44 @@ class PorkbunScrapingHandler {
     const $ = cheerio.load(pricingTableHTML)
     const pricingTable = []
 
-    $('.domainsPricingAllExtensionsItem').each((i, element) => {
-      const extension = $(element).find('.col-xs-3 a').text()
+    $('.row-parent').each((i, element) => {
+      const extension = $(element).find('.extension a').text()
 
-      const registrationCell = $(element).find('.domainsPricingAllExtensionsItemPrice.registration')
+      const registrationCell = $(element).find('.row-parent_item--4')
+      const renewalCell = $(element).find('.row-parent_item--5')
 
-      const registerPrice = registrationCell.find('.sortValue').text();
-      const renewalPrice = $(element).find('.domainsPricingAllExtensionsItemPrice.renewal .sortValue').text();
+      const { price: registerPrice, isOnSale } = this.getPriceAndIsOnSaleFromCell(registrationCell)
 
-      const isOnSale = !!registrationCell.find('.text-muted').length
+      const { price: renewalPrice } = this.getPriceAndIsOnSaleFromCell(renewalCell)
 
-      const registerUrl = $(element).find('.col-xs-3 a').attr('href')
+      const registerUrl = $(element).find('.extension a').attr('href')
 
       pricingTable.push({
         extension,
-        registerPrice: `$${registerPrice}`,
-        renewalPrice: `$${renewalPrice}`,
+        registerPrice,
+        renewalPrice,
         isOnSale,
-        registerUrl: `https://porkbun.com${registerUrl}`
+        registerUrl: `https://www.netim.com${registerUrl}`
       })
     })
 
     return pricingTable
   }
+
+  getPriceAndIsOnSaleFromCell(cell) {
+    let price = cell.text()
+    let isOnSale = false
+
+    if (cell.find('.old-price.text-muted').length) {
+      price = cell.find('.new-price').text()
+      isOnSale = true
+    }
+
+    return {
+      price,
+      isOnSale
+    }
+  }
 }
 
-module.exports = PorkbunScrapingHandler
+module.exports = NetimScrapingHandler

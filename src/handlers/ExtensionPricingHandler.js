@@ -43,7 +43,23 @@ class ExtensionPricingHandler {
 
       // Now we want to convert the passed currencies to their USD values
       const registerPriceUSD = this.currencyHandler.convertToUSD(row.registerPrice)
+
+      // If these prices aren't numbers, they will return NaN
+      // To try and not break everything, we'll check for it and skip if it's found
+      if (isNaN(registerPriceUSD)) {
+        console.log(`${row.extension} skipped, NaN register price.`)
+        console.log(`Register Price: "${row.registerPrice}"`)
+        continue
+      }
+
       const renewalPriceUSD = this.currencyHandler.convertToUSD(row.renewalPrice)
+
+      // See the above
+      if (isNaN(renewalPriceUSD)) {
+        console.log(`${row.extension} skipped, NaN renewal price.`)
+        console.log(`Renewal Price: "${row.renewalPrice}"`)
+        continue
+      }
 
       // Now finally convert the isOnSale boolean to the tinyint the DB is expecting
       const isOnSaleInt = row.isOnSale ? 1 : 0
