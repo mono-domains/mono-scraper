@@ -1,24 +1,10 @@
 const { firefox } = require('playwright')
 const cheerio = require('cheerio')
 
-class GoogleDomainsScrapingHandler {
-  extensionPricingHandler = null
+const BaseScrapingHandler = require('./BaseScrapingHandler')
+
+class GoogleDomainsScrapingHandler extends BaseScrapingHandler {
   registrarUrl = 'https://domains.google/get-started/domain-search/'
-
-  constructor(extensionPricingHandler) {
-    this.extensionPricingHandler = extensionPricingHandler
-  }
-
-  async setPricingData() {
-    // First we fetch the pricing table HTML
-    const pricingTableHTML = await this.getPricingTableHTML()
-
-    // Now parse it into a JS array
-    const pricingTable = this.parsePricingTable(pricingTableHTML)
-
-    // Now pass it into the extensionPricingHandler to add it to the db
-    await this.extensionPricingHandler.setPricingTableInDatabase(pricingTable)
-  }
 
   async getPricingTableHTML() {
     const browser = await firefox.launch()
