@@ -1,9 +1,9 @@
 const { firefox } = require('playwright')
 const cheerio = require('cheerio')
 
-class PorkbunScrapingHandler {
+class GoogleDomainsScrapingHandler {
   extensionPricingHandler = null
-  registrarUrl = 'https://porkbun.com/products/domains'
+  registrarUrl = 'https://domains.google/get-started/domain-search/'
 
   constructor(extensionPricingHandler) {
     this.extensionPricingHandler = extensionPricingHandler
@@ -27,7 +27,9 @@ class PorkbunScrapingHandler {
     const page = await context.newPage()
     await page.goto(this.registrarUrl)
 
-    const pricingTable = await page.innerHTML('#domainsPricingAllExtensionsContainer')
+    await page.click('.price-list__show-more')
+
+    const pricingTable = await page.innerHTML('.price-list__content__grid--show-all')
 
     await browser.close()
 
@@ -38,24 +40,22 @@ class PorkbunScrapingHandler {
     const $ = cheerio.load(pricingTableHTML)
     const pricingTable = []
 
-    $('.domainsPricingAllExtensionsItem').each((i, element) => {
-      const extension = $(element).find('.col-xs-3 a').text()
+    $('.price-list__card').each((i, element) => {
+      const extension = $(element).find('.price-list__card__tld').text()
 
-      const registrationCell = $(element).find('.domainsPricingAllExtensionsItemPrice.registration')
+      const registerPrice = $(element).find('.price-list__card__price').text()
+      const renewalPrice = null
 
-      const registerPrice = registrationCell.find('.sortValue').text()
-      const renewalPrice = $(element).find('.domainsPricingAllExtensionsItemPrice.renewal .sortValue').text()
+      const isOnSale = false
 
-      const isOnSale = !!registrationCell.find('.text-muted').length
-
-      const registerUrl = $(element).find('.col-xs-3 a').attr('href')
+      const registerUrl = $(element).attr('href')
 
       pricingTable.push({
         extension,
-        registerPrice: `$${registerPrice}`,
-        renewalPrice: `$${renewalPrice}`,
+        registerPrice,
+        renewalPrice,
         isOnSale,
-        registerUrl: `https://porkbun.com${registerUrl}`
+        registerUrl: registerUrl ? `https://domains.google${registerUrl}` : this.registrarUrl
       })
     })
 
@@ -63,4 +63,4 @@ class PorkbunScrapingHandler {
   }
 }
 
-module.exports = PorkbunScrapingHandler
+module.exports = GoogleDomainsScrapingHandler

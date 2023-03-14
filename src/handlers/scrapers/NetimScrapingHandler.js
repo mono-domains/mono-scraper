@@ -10,7 +10,7 @@ class NetimScrapingHandler {
   }
 
   async setPricingData() {
-    // First we fetch the pricing table HTML from Porkbun
+    // First we fetch the pricing table HTML
     const pricingTableHTML = await this.getPricingTableHTML()
 
     // Now parse it into a JS array

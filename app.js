@@ -9,6 +9,7 @@ const ExtensionPricingHandler = require('./src/handlers/ExtensionPricingHandler'
 
 const PorkbunScrapingHandler = require('./src/handlers/scrapers/PorkbunScrapingHandler')
 const NetimScrapingHandler = require('./src/handlers/scrapers/NetimScrapingHandler')
+const GoogleDomainsScrapingHandler = require('./src/handlers/scrapers/GoogleDomainsScrapingHandler')
 
 ;(async () => {
   const database = new DatabaseConnection()
@@ -31,7 +32,8 @@ const NetimScrapingHandler = require('./src/handlers/scrapers/NetimScrapingHandl
   // Now we can start with scraping
   const scrapers = {
     'Porkbun': PorkbunScrapingHandler,
-    'Netim': NetimScrapingHandler
+    'Netim': NetimScrapingHandler,
+    'Google Domains': GoogleDomainsScrapingHandler
   }
 
   for (const [registrarName, ScraperClass] of Object.entries(scrapers)) {
