@@ -34,7 +34,7 @@ const NamecheapScrapingHandler = require('./src/handlers/scrapers/NamecheapScrap
   const scrapers = {
     'Porkbun': PorkbunScrapingHandler,
     'Netim': NetimScrapingHandler,
-    'Google Domains': GoogleDomainsScrapingHandler,
+    'Google': GoogleDomainsScrapingHandler,
     'Namecheap': NamecheapScrapingHandler
   }
 
