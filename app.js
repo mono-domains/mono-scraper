@@ -48,13 +48,30 @@ const NamecheapScrapingHandler = require('./src/handlers/scrapers/NamecheapScrap
       extensionHandler
     )
 
+    // Then clear the current registrar pricing info from the table
+    try {
+      await extensionPricingHandler.clearPricingTableInDatabase()
+    } catch (e) {
+      console.log(`Scraping aborted: ${registrarName}`)
+      console.log(e.message)
+
+      continue
+    }
+
     // Then initialize the scraper
     const scraper = new ScraperClass(extensionPricingHandler)
 
     console.log(`Beginning scrape: ${registrarName}`)
 
     // And scrape
-    await scraper.setPricingData()
+    try {
+      await scraper.setPricingData()
+    } catch (e) {
+      console.log(`Scraping aborted: ${registrarName}`)
+      console.log(e.message)
+
+      continue
+    }
 
     console.log(`Scrape finished: ${registrarName}\n`)
   }

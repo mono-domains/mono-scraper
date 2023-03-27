@@ -17,12 +17,23 @@ class ExtensionPricingHandler {
     this.extensionHandler = extensionHandler
   }
 
+  async clearPricingTableInDatabase() {
+    // To ensure the data in the table is up to date, the easiest way is to clear all entries for the
+    // current registrar in the database. This ensures that, for example, if a extension is removed from
+    // a specific registrar, it's not still included in the pricing information on the website.
+
+    // So, let's start by getting the registrar id
+    const registrarId = await this.registrarHandler.getRegistrarId(this.registrarName)
+
+    // Now we can just make a DB query to delete everything with that registrar id
+    await this.db.execute('DELETE FROM extension_pricing WHERE registrarId = ?', [registrarId])
+  }
+
   async setPricingTableInDatabase(pricingTable) {
     // Let's start setting up the DB query to insert all of this information
     const databaseQueryHelper = new DatabaseBulkQueryHelper()
 
     databaseQueryHelper.setPrefix('INSERT INTO extension_pricing (extensionId, registrarId, registerPrice, renewalPrice, url, isOnSale, lastUpdate) VALUES')
-    databaseQueryHelper.setSuffix('ON DUPLICATE KEY UPDATE registerPrice = VALUES(registerPrice), renewalPrice = VALUES(renewalPrice), url = VALUES(url), isOnSale = VALUES(isOnSale), lastUpdate = VALUES(lastUpdate)')
 
     // Since it's always the same, let's get the registrar id here
     const registrarId = await this.registrarHandler.getRegistrarId(this.registrarName)
