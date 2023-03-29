@@ -9,7 +9,7 @@ class DateHelper {
     const minutesString = String(date.getMinutes()).padStart(2, '0')
     const secondsString = String(date.getSeconds()).padStart(2, '0')
 
-    const formattedDateString = `${date.getFullYear()}-${monthString}-${dateString} ${hoursString}-${minutesString}-${secondsString}`
+    const formattedDateString = `${date.getFullYear()}-${monthString}-${dateString} ${hoursString}:${minutesString}:${secondsString}`
 
     return formattedDateString
   }

@@ -1,6 +1,5 @@
 const punycode = require('punycode/')
 const DatabaseBulkQueryHelper = require('../helpers/DatabaseBulkQueryHelper')
-const DateHelper = require('../helpers/DateHelper')
 
 class ExtensionPricingHandler {
   registrarName = null
@@ -33,13 +32,10 @@ class ExtensionPricingHandler {
     // Let's start setting up the DB query to insert all of this information
     const databaseQueryHelper = new DatabaseBulkQueryHelper()
 
-    databaseQueryHelper.setPrefix('INSERT INTO extension_pricing (extensionId, registrarId, registerPrice, renewalPrice, url, isOnSale, lastUpdate) VALUES')
+    databaseQueryHelper.setPrefix('INSERT INTO extension_pricing (extensionId, registrarId, registerPrice, renewalPrice, url, isOnSale) VALUES')
 
     // Since it's always the same, let's get the registrar id here
     const registrarId = await this.registrarHandler.getRegistrarId(this.registrarName)
-
-    // Initialize DateHelper for formatting
-    const dateHelper = new DateHelper()
 
     // Now, we should've been passed an array of objects with the following info
     // { extension, registerPrice, renewalPrice, isOnSale, registerUrl }
@@ -86,8 +82,7 @@ class ExtensionPricingHandler {
         registerPriceUSD,
         renewalPriceUSD,
         row.registerUrl,
-        isOnSaleInt,
-        dateHelper.getSQLFormattedDate(new Date())
+        isOnSaleInt
       ])
     }
 
