@@ -95,7 +95,9 @@ const GandiScrapingHandler = require('./src/handlers/scrapers/GandiScrapingHandl
     await frontEndDeploymentHandler.deployFrontEnd()
   } catch (e) {
     console.log('Error while deploying')
-    console.log(e.message + '\n')
+    console.log(e.message)
+
+    return
   }
 
   console.log('Front End deployment finished')
