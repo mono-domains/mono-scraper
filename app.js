@@ -6,6 +6,7 @@ const CurrencyHandler = require('./src/handlers/CurrencyHandler')
 const RegistrarHandler = require('./src/handlers/RegistrarHandler')
 const ExtensionHandler = require('./src/handlers/ExtensionHandler')
 const ExtensionPricingHandler = require('./src/handlers/ExtensionPricingHandler')
+const FrontEndDeploymentHandler = require('./src/handlers/FrontEndDeploymentHandler')
 
 const PorkbunScrapingHandler = require('./src/handlers/scrapers/PorkbunScrapingHandler')
 const NetimScrapingHandler = require('./src/handlers/scrapers/NetimScrapingHandler')
@@ -57,7 +58,7 @@ const GandiScrapingHandler = require('./src/handlers/scrapers/GandiScrapingHandl
       await extensionPricingHandler.clearPricingTableInDatabase()
     } catch (e) {
       console.log(`Scraping aborted: ${registrarName}`)
-      console.log(e.message)
+      console.log(e.message + '\n')
 
       continue
     }
@@ -72,7 +73,7 @@ const GandiScrapingHandler = require('./src/handlers/scrapers/GandiScrapingHandl
       await scraper.setPricingData()
     } catch (e) {
       console.log(`Scraping aborted: ${registrarName}`)
-      console.log(e.message)
+      console.log(e.message + '\n')
 
       continue
     }
@@ -82,5 +83,20 @@ const GandiScrapingHandler = require('./src/handlers/scrapers/GandiScrapingHandl
 
 
   // Close the DB connection, since we're done
-  connection.end();
+  connection.end()
+
+
+  // Now we can deploy the front end
+  const frontEndDeploymentHandler = new FrontEndDeploymentHandler()
+
+  console.log('Starting Front End deployment')
+
+  try {
+    await frontEndDeploymentHandler.deployFrontEnd()
+  } catch (e) {
+    console.log('Error while deploying')
+    console.log(e.message + '\n')
+  }
+
+  console.log('Front End deployment finished')
 })()
