@@ -24,33 +24,40 @@ class One01DomainScrapingHandler extends BaseScrapingHandler {
     const context = await browser.newContext()
 
     const page = await context.newPage()
-    await page.goto(this.registrarUrl)
 
-    const footerNavigationHTML = await page.innerHTML('.pricelist-footer.filter-navigation')
+    try {
+      await page.goto(this.registrarUrl)
 
-    // So first we need to find all of the different pages of extensions so we can easily
-    // loop through them. They're all contained in footerNavigation, so now have to parse them.
-    const $ = cheerio.load(footerNavigationHTML)
-    const footerNavigationLinks = $('.pricelist-drop--item:not(.popular_list)')
+      const footerNavigationHTML = await page.innerHTML('.pricelist-footer.filter-navigation')
 
-    // Then we just loop through all the ones that we want
-    for (const element of footerNavigationLinks) {
-      const linkId = $(element).attr('id')
-      
-      // Click them
-      await page.click(`[id="${linkId}"]`)
+      // So first we need to find all of the different pages of extensions so we can easily
+      // loop through them. They're all contained in footerNavigation, so now have to parse them.
+      const $ = cheerio.load(footerNavigationHTML)
+      const footerNavigationLinks = $('.pricelist-drop--item:not(.popular_list)')
 
-      // Fetch the resulting pricing table
-      const pricingTable = await page.innerHTML('.pricelist-rows:not(:empty)')
+      // Then we just loop through all the ones that we want
+      for (const element of footerNavigationLinks) {
+        const linkId = $(element).attr('id')
+        
+        // Click them
+        await page.click(`[id="${linkId}"]`)
 
-      const parsedPricingTable = this.parsePricingTable(pricingTable)
+        // Fetch the resulting pricing table
+        const pricingTable = await page.innerHTML('.pricelist-rows:not(:empty)')
 
-      pricingData = pricingData.concat(parsedPricingTable)
+        const parsedPricingTable = this.parsePricingTable(pricingTable)
+
+        pricingData = pricingData.concat(parsedPricingTable)
+      }
+
+      await browser.close()
+
+      return pricingData
+    } catch (e) {
+      await browser.close()
+
+      throw e
     }
-
-    await browser.close()
-
-    return pricingData
   }
 
   parsePricingTable(pricingTableHTML) {

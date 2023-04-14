@@ -11,15 +11,22 @@ class GoogleDomainsScrapingHandler extends BaseScrapingHandler {
     const context = await browser.newContext()
 
     const page = await context.newPage()
-    await page.goto(this.registrarUrl)
 
-    await page.click('.price-list__show-more')
+    try {
+      await page.goto(this.registrarUrl)
 
-    const pricingTable = await page.innerHTML('.price-list__content__grid--show-all')
+      await page.click('.price-list__show-more')
 
-    await browser.close()
+      const pricingTable = await page.innerHTML('.price-list__content__grid--show-all')
 
-    return pricingTable
+      await browser.close()
+
+      return pricingTable
+    } catch(e) {
+      await browser.close()
+
+      throw e
+    }
   }
 
   parsePricingTable(pricingTableHTML) {

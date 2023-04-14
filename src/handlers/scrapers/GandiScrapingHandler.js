@@ -22,41 +22,48 @@ class GandiScrapingHandler extends BaseScrapingHandler {
     const context = await browser.newContext()
 
     const page = await context.newPage()
-    await page.goto(`${this.registrarUrl}?prefix=xn--#tld-table`)
 
-    // Before we do anything, let's parse the pricing table for the IDNs, since we've already got the page
-    const idnPricingTableHTML = await page.innerHTML('.comparative-block')
-    const idnPricingTable = this.parsePricingTable(idnPricingTableHTML)
+    try {
+      await page.goto(`${this.registrarUrl}?prefix=xn--#tld-table`)
 
-    pricingData = pricingData.concat(idnPricingTable)
+      // Before we do anything, let's parse the pricing table for the IDNs, since we've already got the page
+      const idnPricingTableHTML = await page.innerHTML('.comparative-block')
+      const idnPricingTable = this.parsePricingTable(idnPricingTableHTML)
 
-    // So now we want to get a list of all the extension categories, excluding the one we're on currently
-    const filterCategoriesHTML = await page.innerHTML('#extension-table-filters')
+      pricingData = pricingData.concat(idnPricingTable)
 
-    // Then we want to parse it to get all the categories
-    const $ = cheerio.load(filterCategoriesHTML)
-    const filterCategories = $('.extended-domain-table__filter:not(.extended-domain-table__filter--active)')
+      // So now we want to get a list of all the extension categories, excluding the one we're on currently
+      const filterCategoriesHTML = await page.innerHTML('#extension-table-filters')
 
-    // Now we've got these, we can loop through them all
-    for (const category of filterCategories) {
-      // Get their links
-      const categoryLink = $(category).attr('href')
+      // Then we want to parse it to get all the categories
+      const $ = cheerio.load(filterCategoriesHTML)
+      const filterCategories = $('.extended-domain-table__filter:not(.extended-domain-table__filter--active)')
 
-      // Navigate to those links
-      await page.goto(this.registrarUrl + categoryLink)
+      // Now we've got these, we can loop through them all
+      for (const category of filterCategories) {
+        // Get their links
+        const categoryLink = $(category).attr('href')
 
-      // Get the pricing table
-      const pricingTableHTML = await page.innerHTML('.comparative-block')
+        // Navigate to those links
+        await page.goto(this.registrarUrl + categoryLink)
 
-      // Then parse it, and add it on to the rest
-      const pricingTable = this.parsePricingTable(pricingTableHTML)
+        // Get the pricing table
+        const pricingTableHTML = await page.innerHTML('.comparative-block')
 
-      pricingData = pricingData.concat(pricingTable)
+        // Then parse it, and add it on to the rest
+        const pricingTable = this.parsePricingTable(pricingTableHTML)
+
+        pricingData = pricingData.concat(pricingTable)
+      }
+
+      await browser.close()
+
+      return pricingData
+    } catch (e) {
+      await browser.close()
+      
+      throw e
     }
-
-    await browser.close()
-
-    return pricingData
   }
 
   parsePricingTable(pricingTableHTML) {

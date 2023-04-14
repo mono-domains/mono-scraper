@@ -11,13 +11,20 @@ class NetimScrapingHandler extends BaseScrapingHandler {
     const context = await browser.newContext()
 
     const page = await context.newPage()
-    await page.goto(this.registrarUrl)
 
-    const pricingTable = await page.innerHTML('.contour-tableau')
+    try {
+      await page.goto(this.registrarUrl)
 
-    await browser.close()
+      const pricingTable = await page.innerHTML('.contour-tableau')
 
-    return pricingTable
+      await browser.close()
+
+      return pricingTable
+    } catch (e) {
+      await browser.close()
+
+      throw e
+    }
   }
 
   parsePricingTable(pricingTableHTML) {

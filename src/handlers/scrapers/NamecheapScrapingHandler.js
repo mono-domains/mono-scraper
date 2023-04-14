@@ -11,17 +11,24 @@ class NamecheapScrapingHandler extends BaseScrapingHandler {
     const context = await browser.newContext()
 
     const page = await context.newPage()
-    await page.goto(this.registrarUrl)
 
-    await page.click('.gb-btn-show-more')
+    try {
+      await page.goto(this.registrarUrl)
 
-    await page.waitForSelector('.gb-tld-name[href="/domains/registration/gtld/zone/"]')
+      await page.click('.gb-btn-show-more')
 
-    const pricingTable = await page.innerHTML('.gb-domain-name-search--pricing')
+      await page.waitForSelector('.gb-tld-name[href="/domains/registration/gtld/zone/"]')
 
-    await browser.close()
+      const pricingTable = await page.innerHTML('.gb-domain-name-search--pricing')
 
-    return pricingTable
+      await browser.close()
+
+      return pricingTable
+    } catch (e) {
+      await browser.close()
+
+      throw e
+    }
   }
 
   parsePricingTable(pricingTableHTML) {
