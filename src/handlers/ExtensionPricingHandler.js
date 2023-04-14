@@ -91,18 +91,31 @@ class ExtensionPricingHandler {
     const { query, params, numberOfRows } = databaseQueryHelper.getQuery()
 
     // And execute it
-    const [insertPricingRes] = await this.db.execute(query, params)
+    try {
+      // First, let's ask MySQL to EXPLAIN the query to see if it'll work fine
+      await this.db.execute(`EXPLAIN ${query}`, params)
 
-    const affectedRows = insertPricingRes.affectedRows
+      // It did, so now let's clear the db of any info
+      await this.clearPricingTableInDatabase()
 
-    if (numberOfRows !== affectedRows && numberOfRows !== affectedRows / 2) {
-      console.log('Pricing insert mismatch')
-      console.log(`Expected vs Affected: ${numberOfRows} / ${affectedRows}`)
+      // And insert the new info
+      const [insertPricingRes] = await this.db.execute(query, params)
 
-      return
+      const affectedRows = insertPricingRes.affectedRows
+
+      if (numberOfRows !== affectedRows && numberOfRows !== affectedRows / 2) {
+        console.log('Pricing insert mismatch')
+        console.log(`Expected vs Affected: ${numberOfRows} / ${affectedRows}`)
+
+        return
+      }
+
+      console.log(`${numberOfRows} pricings updated`)
+    } catch (e) {
+      console.log(e)
+
+      throw new Error('MySQL insert error')
     }
-
-    console.log(`${numberOfRows} pricings updated`)
   }
 }
 

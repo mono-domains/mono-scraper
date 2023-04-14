@@ -53,16 +53,6 @@ const GandiScrapingHandler = require('./src/handlers/scrapers/GandiScrapingHandl
       extensionHandler
     )
 
-    // Then clear the current registrar pricing info from the table
-    try {
-      await extensionPricingHandler.clearPricingTableInDatabase()
-    } catch (e) {
-      console.log(`Scraping aborted: ${registrarName}`)
-      console.log(e.message + '\n')
-
-      continue
-    }
-
     // Then initialize the scraper
     const scraper = new ScraperClass(extensionPricingHandler)
 
