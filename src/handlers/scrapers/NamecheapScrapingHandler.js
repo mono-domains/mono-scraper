@@ -56,8 +56,7 @@ class NamecheapScrapingHandler extends BaseScrapingHandler {
           registerPrice,
           renewalPrice,
           isOnSale,
-          // registerUrl: registerUrl ? `https://www.namecheap.com${registerUrl}` : this.registrarUrl
-          registerUrl: 'https://namecheap.pxf.io/jrrrGP'
+          registerUrl: registerUrl ? `https://www.namecheap.com${registerUrl}` : this.registrarUrl
         })
       })
     })

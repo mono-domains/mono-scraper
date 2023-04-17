@@ -48,7 +48,7 @@ class NetimScrapingHandler extends BaseScrapingHandler {
         registerPrice,
         renewalPrice,
         isOnSale,
-        registerUrl: `https://www.netim.com${registerUrl}?partnerid=SJ7675`
+        registerUrl: `https://www.netim.com${registerUrl}`
       })
     })
 
