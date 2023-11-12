@@ -37,7 +37,6 @@ const GandiScrapingHandler = require('./src/handlers/scrapers/GandiScrapingHandl
   const scrapers = {
     'Porkbun': PorkbunScrapingHandler,
     'Netim': NetimScrapingHandler,
-    'Google': GoogleDomainsScrapingHandler,
     'Namecheap': NamecheapScrapingHandler,
     '101Domain': One01DomainScrapingHandler,
     'Gandi': GandiScrapingHandler
