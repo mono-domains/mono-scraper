@@ -10,7 +10,6 @@ const FrontEndDeploymentHandler = require('./src/handlers/FrontEndDeploymentHand
 
 const PorkbunScrapingHandler = require('./src/handlers/scrapers/PorkbunScrapingHandler')
 const NetimScrapingHandler = require('./src/handlers/scrapers/NetimScrapingHandler')
-const GoogleDomainsScrapingHandler = require('./src/handlers/scrapers/GoogleDomainsScrapingHandler')
 const NamecheapScrapingHandler = require('./src/handlers/scrapers/NamecheapScrapingHandler')
 const One01DomainScrapingHandler = require('./src/handlers/scrapers/101DomainScrapingHandler')
 const GandiScrapingHandler = require('./src/handlers/scrapers/GandiScrapingHandler')
