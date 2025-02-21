@@ -15,7 +15,9 @@ class PorkbunScrapingHandler extends BaseScrapingHandler {
     try {
       await page.goto(this.registrarUrl)
 
-      const pricingTable = await page.innerHTML('#domainsPricingAllExtensionsContainer')
+      const pricingTable = await page.innerHTML(
+        '#domainsPricingAllExtensionsContainer'
+      )
 
       await browser.close()
 
@@ -34,10 +36,14 @@ class PorkbunScrapingHandler extends BaseScrapingHandler {
     $('.domainsPricingAllExtensionsItem').each((i, element) => {
       const extension = $(element).find('.col-xs-3 a').text()
 
-      const registrationCell = $(element).find('.domainsPricingAllExtensionsItemPrice.registration')
+      const registrationCell = $(element).find(
+        '.domainsPricingAllExtensionsItemPrice.registration'
+      )
 
       const registerPrice = registrationCell.find('.sortValue').text()
-      const renewalPrice = $(element).find('.domainsPricingAllExtensionsItemPrice.renewal .sortValue').text()
+      const renewalPrice = $(element)
+        .find('.domainsPricingAllExtensionsItemPrice.renewal .sortValue')
+        .text()
 
       const isOnSale = !!registrationCell.find('.text-muted').length
 
@@ -48,7 +54,7 @@ class PorkbunScrapingHandler extends BaseScrapingHandler {
         registerPrice: `$${registerPrice}`,
         renewalPrice: `$${renewalPrice}`,
         isOnSale,
-        registerUrl: `https://porkbun.com${registerUrl}`
+        registerUrl: `https://porkbun.com${registerUrl}`,
       })
     })
 

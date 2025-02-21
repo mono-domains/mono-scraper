@@ -17,9 +17,13 @@ class NamecheapScrapingHandler extends BaseScrapingHandler {
 
       await page.click('.gb-btn-show-more')
 
-      await page.waitForSelector('.gb-tld-name[href="/domains/registration/gtld/zone/"]')
+      await page.waitForSelector(
+        '.gb-tld-name[href="/domains/registration/gtld/zone/"]'
+      )
 
-      const pricingTable = await page.innerHTML('.gb-domain-name-search--pricing')
+      const pricingTable = await page.innerHTML(
+        '.gb-domain-name-search--pricing'
+      )
 
       await browser.close()
 
@@ -36,29 +40,35 @@ class NamecheapScrapingHandler extends BaseScrapingHandler {
     const pricingTable = []
 
     $('tbody').each((i, tbody) => {
-      $(tbody).find('tr').each((i, element) => {
-        const extension = $(element).find('.gb-tld-name').text()
+      $(tbody)
+        .find('tr')
+        .each((i, element) => {
+          const extension = $(element).find('.gb-tld-name').text()
 
-        const registerPrice = $(element).find('.gb-price:first-child').text()
-        const renewalPrice = $(element).find('.gb-price:last-child > span').text()
+          const registerPrice = $(element).find('.gb-price:first-child').text()
+          const renewalPrice = $(element)
+            .find('.gb-price:last-child > span')
+            .text()
 
-        // In case the prices aren't set, skip this one
-        if (!registerPrice || !renewalPrice) {
-          return
-        }
+          // In case the prices aren't set, skip this one
+          if (!registerPrice || !renewalPrice) {
+            return
+          }
 
-        const isOnSale = !!$(element).find('.gb-label--sale').length
+          const isOnSale = !!$(element).find('.gb-label--sale').length
 
-        const registerUrl = $(element).find('.gb-tld-name').attr('href')
+          const registerUrl = $(element).find('.gb-tld-name').attr('href')
 
-        pricingTable.push({
-          extension,
-          registerPrice,
-          renewalPrice,
-          isOnSale,
-          registerUrl: registerUrl ? `https://www.namecheap.com${registerUrl}` : this.registrarUrl
+          pricingTable.push({
+            extension,
+            registerPrice,
+            renewalPrice,
+            isOnSale,
+            registerUrl: registerUrl
+              ? `https://www.namecheap.com${registerUrl}`
+              : this.registrarUrl,
+          })
         })
-      })
     })
 
     return pricingTable

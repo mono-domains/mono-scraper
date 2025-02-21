@@ -17,12 +17,14 @@ class GoogleDomainsScrapingHandler extends BaseScrapingHandler {
 
       await page.click('.price-list__show-more')
 
-      const pricingTable = await page.innerHTML('.price-list__content__grid--show-all')
+      const pricingTable = await page.innerHTML(
+        '.price-list__content__grid--show-all'
+      )
 
       await browser.close()
 
       return pricingTable
-    } catch(e) {
+    } catch (e) {
       await browser.close()
 
       throw e
@@ -48,7 +50,9 @@ class GoogleDomainsScrapingHandler extends BaseScrapingHandler {
         registerPrice,
         renewalPrice,
         isOnSale,
-        registerUrl: registerUrl ? `https://domains.google${registerUrl}` : this.registrarUrl
+        registerUrl: registerUrl
+          ? `https://domains.google${registerUrl}`
+          : this.registrarUrl,
       })
     })
 

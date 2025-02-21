@@ -33,11 +33,15 @@ class GandiScrapingHandler extends BaseScrapingHandler {
       pricingData = pricingData.concat(idnPricingTable)
 
       // So now we want to get a list of all the extension categories, excluding the one we're on currently
-      const filterCategoriesHTML = await page.innerHTML('#extension-table-filters')
+      const filterCategoriesHTML = await page.innerHTML(
+        '#extension-table-filters'
+      )
 
       // Then we want to parse it to get all the categories
       const $ = cheerio.load(filterCategoriesHTML)
-      const filterCategories = $('.extended-domain-table__filter:not(.extended-domain-table__filter--active)')
+      const filterCategories = $(
+        '.extended-domain-table__filter:not(.extended-domain-table__filter--active)'
+      )
 
       // Now we've got these, we can loop through them all
       for (const category of filterCategories) {
@@ -61,7 +65,7 @@ class GandiScrapingHandler extends BaseScrapingHandler {
       return pricingData
     } catch (e) {
       await browser.close()
-      
+
       throw e
     }
   }
@@ -71,31 +75,41 @@ class GandiScrapingHandler extends BaseScrapingHandler {
     const pricingTable = []
 
     $('.comparative-table__body').each((i, tbody) => {
-      $(tbody).find('tr').each((i, row) => {
-        const extensionLink = $(row).find('.comparative-table__cell--tld a')
+      $(tbody)
+        .find('tr')
+        .each((i, row) => {
+          const extensionLink = $(row).find('.comparative-table__cell--tld a')
 
-        const extension = extensionLink.text()
+          const extension = extensionLink.text()
 
-        const registerPrice = $(row).find('.comparative-table__cell:nth-child(2) .comparative-table__price').text()
-        const renewalPrice = $(row).find('.comparative-table__cell:nth-child(4) .comparative-table__price').text()
+          const registerPrice = $(row)
+            .find(
+              '.comparative-table__cell:nth-child(2) .comparative-table__price'
+            )
+            .text()
+          const renewalPrice = $(row)
+            .find(
+              '.comparative-table__cell:nth-child(4) .comparative-table__price'
+            )
+            .text()
 
-        // If the registerPrice isn't set then it's not for sale, so skip it
-        if (!registerPrice) {
-          return
-        }
+          // If the registerPrice isn't set then it's not for sale, so skip it
+          if (!registerPrice) {
+            return
+          }
 
-        const isOnSale = !!$(row).find('.badge--promo').length
+          const isOnSale = !!$(row).find('.badge--promo').length
 
-        const registerUrl = extensionLink.attr('href')
+          const registerUrl = extensionLink.attr('href')
 
-        pricingTable.push({
-          extension,
-          registerPrice,
-          renewalPrice,
-          isOnSale,
-          registerUrl: `https://www.gandi.net${registerUrl}`
+          pricingTable.push({
+            extension,
+            registerPrice,
+            renewalPrice,
+            isOnSale,
+            registerUrl: `https://www.gandi.net${registerUrl}`,
+          })
         })
-      })
     })
 
     return pricingTable

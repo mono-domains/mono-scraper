@@ -37,9 +37,11 @@ class NetimScrapingHandler extends BaseScrapingHandler {
       const registrationCell = $(element).find('.row-parent_item--4')
       const renewalCell = $(element).find('.row-parent_item--5')
 
-      const { price: registerPrice, isOnSale } = this.getPriceAndIsOnSaleFromCell(registrationCell)
+      const { price: registerPrice, isOnSale } =
+        this.getPriceAndIsOnSaleFromCell(registrationCell)
 
-      const { price: renewalPrice } = this.getPriceAndIsOnSaleFromCell(renewalCell)
+      const { price: renewalPrice } =
+        this.getPriceAndIsOnSaleFromCell(renewalCell)
 
       const registerUrl = $(element).find('.extension a').attr('href')
 
@@ -48,7 +50,7 @@ class NetimScrapingHandler extends BaseScrapingHandler {
         registerPrice,
         renewalPrice,
         isOnSale,
-        registerUrl: `https://www.netim.com${registerUrl}`
+        registerUrl: `https://www.netim.com${registerUrl}`,
       })
     })
 
@@ -66,7 +68,7 @@ class NetimScrapingHandler extends BaseScrapingHandler {
 
     return {
       price,
-      isOnSale
+      isOnSale,
     }
   }
 }

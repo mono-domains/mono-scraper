@@ -8,12 +8,14 @@ class ExtensionHandler {
 
   async getExtensionsTable() {
     // Get the extensions from the SQL table
-    const [extensionsRows] = await this.db.execute('SELECT id, extension FROM extensions')
+    const [extensionsRows] = await this.db.execute(
+      'SELECT id, extension FROM extensions'
+    )
 
     // Reformat the array into an object
     const extensions = {}
 
-    extensionsRows.forEach((row) => {
+    extensionsRows.forEach(row => {
       extensions[row.extension] = row.id
     })
 
@@ -32,7 +34,10 @@ class ExtensionHandler {
 
   async createExtension(extension) {
     // Set it in the DB first
-    const [extensionCreateRes] = await this.db.execute('INSERT INTO extensions(extension) VALUES (?)', [extension])
+    const [extensionCreateRes] = await this.db.execute(
+      'INSERT INTO extensions(extension) VALUES (?)',
+      [extension]
+    )
 
     if (extensionCreateRes.affectedRows === 0) {
       throw new Error('Cannot create extension in DB')

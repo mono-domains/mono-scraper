@@ -8,7 +8,13 @@ class ExtensionPricingHandler {
   registrarHandler = null
   extensionHandler = null
 
-  constructor(registrarName, connection, currencyHandler, registrarHandler, extensionHandler) {
+  constructor(
+    registrarName,
+    connection,
+    currencyHandler,
+    registrarHandler,
+    extensionHandler
+  ) {
     this.registrarName = registrarName
     this.db = connection
     this.currencyHandler = currencyHandler
@@ -22,20 +28,32 @@ class ExtensionPricingHandler {
     // a specific registrar, it's not still included in the pricing information on the website.
 
     // So, let's start by getting the registrar id
-    const registrarId = await this.registrarHandler.getRegistrarId(this.registrarName)
+    const registrarId = await this.registrarHandler.getRegistrarId(
+      this.registrarName
+    )
 
     // Now we can just make a DB query to delete everything with that registrar id
-    await this.db.execute('DELETE FROM extension_pricing WHERE registrarId = ?', [registrarId])
+    await this.db.execute(
+      'DELETE FROM extension_pricing WHERE registrarId = ?',
+      [registrarId]
+    )
   }
 
   async setPricingTableInDatabase(pricingTable) {
     // Let's start setting up the DB query to insert all of this information
     const databaseQueryHelper = new DatabaseBulkQueryHelper()
 
-    databaseQueryHelper.setPrefix('INSERT INTO extension_pricing (extensionId, registrarId, registerPrice, renewalPrice, url, isOnSale) VALUES')
+    databaseQueryHelper.setPrefix(
+      'INSERT INTO extension_pricing (extensionId, registrarId, registerPrice, renewalPrice, url, isOnSale) VALUES'
+    )
 
     // Since it's always the same, let's get the registrar id here
-    const registrarId = await this.registrarHandler.getRegistrarId(this.registrarName)
+    const registrarId = await this.registrarHandler.getRegistrarId(
+      this.registrarName
+    )
+
+    // Before we start, let's refresh the extensions table
+    await this.extensionHandler.getExtensionsTable()
 
     // Now, we should've been passed an array of objects with the following info
     // { extension, registerPrice, renewalPrice, isOnSale, registerUrl }
@@ -43,13 +61,19 @@ class ExtensionPricingHandler {
     for (const row of pricingTable) {
       // We wanna first encode the extension with punycode if it's not already
       const extension = row.extension
-      const encodedExtension = extension.startsWith('.xn--') ? extension : punycode.toASCII(extension)
+      const encodedExtension = extension.startsWith('.xn--')
+        ? extension
+        : punycode.toASCII(extension)
 
       // Then get it's id out of the database
-      const extensionId = await this.extensionHandler.getExtensionId(encodedExtension)
+      const extensionId = await this.extensionHandler.getExtensionId(
+        encodedExtension
+      )
 
       // Now we want to convert the passed currencies to their USD values
-      const registerPriceUSD = this.currencyHandler.convertToUSD(row.registerPrice)
+      const registerPriceUSD = this.currencyHandler.convertToUSD(
+        row.registerPrice
+      )
 
       // If these prices aren't numbers, they will return NaN
       // To try and not break everything, we'll check for it and skip if it's found
@@ -82,7 +106,7 @@ class ExtensionPricingHandler {
         registerPriceUSD,
         renewalPriceUSD,
         row.registerUrl,
-        isOnSaleInt
+        isOnSaleInt,
       ])
     }
 

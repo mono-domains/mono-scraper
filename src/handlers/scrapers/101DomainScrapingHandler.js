@@ -28,17 +28,21 @@ class One01DomainScrapingHandler extends BaseScrapingHandler {
     try {
       await page.goto(this.registrarUrl)
 
-      const footerNavigationHTML = await page.innerHTML('.pricelist-footer.filter-navigation')
+      const footerNavigationHTML = await page.innerHTML(
+        '.pricelist-footer.filter-navigation'
+      )
 
       // So first we need to find all of the different pages of extensions so we can easily
       // loop through them. They're all contained in footerNavigation, so now have to parse them.
       const $ = cheerio.load(footerNavigationHTML)
-      const footerNavigationLinks = $('.pricelist-drop--item:not(.popular_list)')
+      const footerNavigationLinks = $(
+        '.pricelist-drop--item:not(.popular_list)'
+      )
 
       // Then we just loop through all the ones that we want
       for (const element of footerNavigationLinks) {
         const linkId = $(element).attr('id')
-        
+
         // Click them
         await page.click(`[id="${linkId}"]`)
 
@@ -76,8 +80,12 @@ class One01DomainScrapingHandler extends BaseScrapingHandler {
         continue
       }
 
-      const registerPrice = $(row).find('.pricelist-row--item .price-current').text()
-      const renewalPrice = $(row).find('.pricelist-row--item .price-renew').text()
+      const registerPrice = $(row)
+        .find('.pricelist-row--item .price-current')
+        .text()
+      const renewalPrice = $(row)
+        .find('.pricelist-row--item .price-renew')
+        .text()
 
       const isOnSale = !!$(row).find('.on-sale').length
 
@@ -88,7 +96,7 @@ class One01DomainScrapingHandler extends BaseScrapingHandler {
         registerPrice: this.getNormalizedPriceString(registerPrice),
         renewalPrice: this.getNormalizedPriceString(renewalPrice),
         isOnSale,
-        registerUrl
+        registerUrl,
       })
 
       this.checkedExtensions.push(extension)

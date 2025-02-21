@@ -19,13 +19,15 @@ class CurrencyHandler {
       console.log('ExchangeRateAPI issue, falling back to db\n')
 
       // Fetch existing currency data from db
-      const [currencyTableRows] = await this.db.execute('SELECT currencyCode, rate FROM currency')
+      const [currencyTableRows] = await this.db.execute(
+        'SELECT currencyCode, rate FROM currency'
+      )
 
       // The data is currently in an array like [{ currencyCode: XXX, rate: ##.## }] when we want it
       // in an object format like { XXX: ##.## }, so we can just reformat it a bit here
       const currencyTable = {}
 
-      currencyTableRows.forEach((row) => {
+      currencyTableRows.forEach(row => {
         currencyTable[row.currencyCode] = row.rate
       })
 
@@ -39,8 +41,12 @@ class CurrencyHandler {
     const databaseQueryHelper = new DatabaseBulkQueryHelper()
 
     // Set the basics of the SQL update
-    databaseQueryHelper.setPrefix('INSERT INTO currency(currencyCode, rate) VALUES')
-    databaseQueryHelper.setSuffix('ON DUPLICATE KEY UPDATE currencyCode = VALUES(currencyCode), rate = VALUES(rate)')
+    databaseQueryHelper.setPrefix(
+      'INSERT INTO currency(currencyCode, rate) VALUES'
+    )
+    databaseQueryHelper.setSuffix(
+      'ON DUPLICATE KEY UPDATE currencyCode = VALUES(currencyCode), rate = VALUES(rate)'
+    )
 
     // Now loop through the table and add all the values in
     for (const entry of Object.entries(this.currencyTable)) {

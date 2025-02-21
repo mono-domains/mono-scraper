@@ -22,7 +22,7 @@ class FrontEndDeploymentHandler {
 
     await axios({
       url: process.env.NETLIFY_BUILD_HOOK_URL,
-      method: 'POST'
+      method: 'POST',
     })
   }
 
@@ -32,9 +32,12 @@ class FrontEndDeploymentHandler {
     const connection = await ssh.getConnection()
 
     // Run the build command
-    const { stderr } = await connection.execCommand('source ~/.nvm/nvm.sh && npm run generate', {
-      cwd: '/usr/share/nginx/html'
-    })
+    const { stderr } = await connection.execCommand(
+      'source ~/.nvm/nvm.sh && npm run generate',
+      {
+        cwd: '/usr/share/nginx/html',
+      }
+    )
 
     if (stderr && !stderr.startsWith('WARN')) {
       throw new Error(stderr)

@@ -12,12 +12,10 @@ const PorkbunScrapingHandler = require('./src/handlers/scrapers/PorkbunScrapingH
 const NetimScrapingHandler = require('./src/handlers/scrapers/NetimScrapingHandler')
 const NamecheapScrapingHandler = require('./src/handlers/scrapers/NamecheapScrapingHandler')
 const One01DomainScrapingHandler = require('./src/handlers/scrapers/101DomainScrapingHandler')
-const GandiScrapingHandler = require('./src/handlers/scrapers/GandiScrapingHandler')
 
 ;(async () => {
   const database = new DatabaseConnection()
   const connection = await database.createConnection()
-
 
   // First, we update the currency in case it's out of date
   const currencyHandler = new CurrencyHandler(connection)
@@ -31,14 +29,12 @@ const GandiScrapingHandler = require('./src/handlers/scrapers/GandiScrapingHandl
   const extensionHandler = new ExtensionHandler(connection)
   await extensionHandler.getExtensionsTable()
 
-
   // Now we can start with scraping
   const scrapers = {
-    'Porkbun': PorkbunScrapingHandler,
-    'Netim': NetimScrapingHandler,
-    'Namecheap': NamecheapScrapingHandler,
+    Porkbun: PorkbunScrapingHandler,
+    Netim: NetimScrapingHandler,
+    Namecheap: NamecheapScrapingHandler,
     '101Domain': One01DomainScrapingHandler,
-    'Gandi': GandiScrapingHandler
   }
 
   for (const [registrarName, ScraperClass] of Object.entries(scrapers)) {
@@ -63,16 +59,16 @@ const GandiScrapingHandler = require('./src/handlers/scrapers/GandiScrapingHandl
       console.log(`Scraping aborted: ${registrarName}`)
       console.log(e.message + '\n')
 
+      console.log(e)
+
       continue
     }
 
     console.log(`Scrape finished: ${registrarName}\n`)
   }
 
-
   // Close the DB connection, since we're done
   connection.end()
-
 
   // Now we can deploy the front end
   const frontEndDeploymentHandler = new FrontEndDeploymentHandler()

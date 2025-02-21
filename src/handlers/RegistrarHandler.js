@@ -8,12 +8,14 @@ class RegistrarHandler {
 
   async getRegistrarTable() {
     // Get the registrars from the SQL table
-    const [registrarRows] = await this.db.execute('SELECT id, name FROM registrars')
+    const [registrarRows] = await this.db.execute(
+      'SELECT id, name FROM registrars'
+    )
 
     // Reformat the array into an object
     const registrars = {}
 
-    registrarRows.forEach((row) => {
+    registrarRows.forEach(row => {
       registrars[row.name] = row.id
     })
 
@@ -32,7 +34,10 @@ class RegistrarHandler {
 
   async createRegistrar(name) {
     // Set it in the DB first
-    const [registrarCreateRes] = await this.db.execute('INSERT INTO registrars(name) VALUES (?)', [name])
+    const [registrarCreateRes] = await this.db.execute(
+      'INSERT INTO registrars(name) VALUES (?)',
+      [name]
+    )
 
     if (registrarCreateRes.affectedRows === 0) {
       throw new Error('Cannot create registrar in DB')

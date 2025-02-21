@@ -10,7 +10,7 @@ class SSHConnection {
       username: process.env.SSH_USERNAME,
       password: process.env.SSH_PASSWORD,
       privateKeyPath: process.env.SSH_PRIVKEY_PATH,
-      passphrase: process.env.SSH_PRIVKEY_PASSPHRASE
+      passphrase: process.env.SSH_PRIVKEY_PASSPHRASE,
     })
 
     return ssh
