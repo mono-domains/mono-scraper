@@ -23,6 +23,15 @@ class DatabaseConnection {
 
     return this.connection
   }
+
+  async closeConnection() {
+    if (!this.connection) {
+      throw new Error('Connection not initialized')
+    }
+
+    await this.connection.end()
+    this.connection = null
+  }
 }
 
 module.exports = DatabaseConnection

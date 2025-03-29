@@ -1,45 +1,50 @@
 const punycode = require('punycode/')
 const DatabaseBulkQueryHelper = require('../helpers/DatabaseBulkQueryHelper')
+const DatabaseConnection = require('../connections/DatabaseConnection')
+const RegistrarHandler = require('./RegistrarHandler')
+const ExtensionHandler = require('./ExtensionHandler')
+const CurrencyHandler = require('./CurrencyHandler')
 
 class ExtensionPricingHandler {
   registrarName = null
-  db = null
-  currencyHandler = null
-  registrarHandler = null
-  extensionHandler = null
 
-  constructor(
-    registrarName,
-    connection,
-    currencyHandler,
-    registrarHandler,
-    extensionHandler
-  ) {
+  constructor(registrarName) {
     this.registrarName = registrarName
-    this.db = connection
-    this.currencyHandler = currencyHandler
-    this.registrarHandler = registrarHandler
-    this.extensionHandler = extensionHandler
   }
 
-  async clearPricingTableInDatabase() {
+  async clearPricingTableInDatabase(connection) {
     // To ensure the data in the table is up to date, the easiest way is to clear all entries for the
     // current registrar in the database. This ensures that, for example, if a extension is removed from
     // a specific registrar, it's not still included in the pricing information on the website.
 
+    // Then create a registrarHandler
+    const registrarHandler = new RegistrarHandler(connection)
+
     // So, let's start by getting the registrar id
-    const registrarId = await this.registrarHandler.getRegistrarId(
+    const registrarId = await registrarHandler.getRegistrarId(
       this.registrarName
     )
 
     // Now we can just make a DB query to delete everything with that registrar id
-    await this.db.execute(
+    await connection.execute(
       'DELETE FROM extension_pricing WHERE registrarId = ?',
       [registrarId]
     )
   }
 
-  async setPricingTableInDatabase(pricingTable) {
+  async setPricingTableInDatabase(pricingTable, shouldUpdateCurrencyTable) {
+    // First, let's get a connection to the database
+    const db = new DatabaseConnection()
+    const connection = await db.createConnection()
+
+    // Then, let's create the other handlers that we need
+    const registrarHandler = new RegistrarHandler(connection)
+    const extensionHandler = new ExtensionHandler(connection)
+    const currencyHandler = new CurrencyHandler(
+      connection,
+      shouldUpdateCurrencyTable
+    )
+
     // Let's start setting up the DB query to insert all of this information
     const databaseQueryHelper = new DatabaseBulkQueryHelper()
 
@@ -48,12 +53,12 @@ class ExtensionPricingHandler {
     )
 
     // Since it's always the same, let's get the registrar id here
-    const registrarId = await this.registrarHandler.getRegistrarId(
+    const registrarId = await registrarHandler.getRegistrarId(
       this.registrarName
     )
 
     // Before we start, let's refresh the extensions table
-    await this.extensionHandler.getExtensionsTable()
+    await extensionHandler.getExtensionsTable()
 
     // Now, we should've been passed an array of objects with the following info
     // { extension, registerPrice, renewalPrice, isOnSale, registerUrl }
@@ -66,12 +71,12 @@ class ExtensionPricingHandler {
         : punycode.toASCII(extension)
 
       // Then get it's id out of the database
-      const extensionId = await this.extensionHandler.getExtensionId(
+      const extensionId = await extensionHandler.getExtensionId(
         encodedExtension
       )
 
       // Now we want to convert the passed currencies to their USD values
-      const registerPriceUSD = this.currencyHandler.convertToUSD(
+      const registerPriceUSD = await currencyHandler.convertToUSD(
         row.registerPrice
       )
 
@@ -86,7 +91,7 @@ class ExtensionPricingHandler {
       let renewalPriceUSD = null
 
       if (row.renewalPrice) {
-        renewalPriceUSD = this.currencyHandler.convertToUSD(row.renewalPrice)
+        renewalPriceUSD = await currencyHandler.convertToUSD(row.renewalPrice)
 
         // See the above
         if (isNaN(renewalPriceUSD)) {
@@ -117,13 +122,13 @@ class ExtensionPricingHandler {
     // And execute it
     try {
       // First, let's ask MySQL to EXPLAIN the query to see if it'll work fine
-      await this.db.execute(`EXPLAIN ${query}`, params)
+      await connection.execute(`EXPLAIN ${query}`, params)
 
       // It did, so now let's clear the db of any info
-      await this.clearPricingTableInDatabase()
+      await this.clearPricingTableInDatabase(connection)
 
       // And insert the new info
-      const [insertPricingRes] = await this.db.execute(query, params)
+      const [insertPricingRes] = await connection.execute(query, params)
 
       const affectedRows = insertPricingRes.affectedRows
 
@@ -140,6 +145,9 @@ class ExtensionPricingHandler {
 
       throw new Error('MySQL insert error')
     }
+
+    // Now we can close the connection
+    await db.closeConnection()
   }
 }
 

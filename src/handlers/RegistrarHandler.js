@@ -23,6 +23,11 @@ class RegistrarHandler {
   }
 
   async getRegistrarId(name) {
+    // If the registrar table is empty, get it
+    if (Object.keys(this.registrars).length === 0) {
+      await this.getRegistrarTable()
+    }
+
     if (this.registrars[name]) {
       return this.registrars[name]
     }

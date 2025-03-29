@@ -23,6 +23,11 @@ class ExtensionHandler {
   }
 
   async getExtensionId(extension) {
+    // If the extensions table is empty, get it
+    if (Object.keys(this.extensions).length === 0) {
+      await this.getExtensionsTable()
+    }
+
     if (this.extensions[extension]) {
       return this.extensions[extension]
     }

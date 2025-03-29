@@ -1,10 +1,5 @@
 require('dotenv').config({ path: `${__dirname}/.env` })
 
-const DatabaseConnection = require('./src/connections/DatabaseConnection')
-
-const CurrencyHandler = require('./src/handlers/CurrencyHandler')
-const RegistrarHandler = require('./src/handlers/RegistrarHandler')
-const ExtensionHandler = require('./src/handlers/ExtensionHandler')
 const ExtensionPricingHandler = require('./src/handlers/ExtensionPricingHandler')
 const FrontEndDeploymentHandler = require('./src/handlers/FrontEndDeploymentHandler')
 
@@ -14,20 +9,7 @@ const NamecheapScrapingHandler = require('./src/handlers/scrapers/NamecheapScrap
 const One01DomainScrapingHandler = require('./src/handlers/scrapers/101DomainScrapingHandler')
 
 ;(async () => {
-  const database = new DatabaseConnection()
-  const connection = await database.createConnection()
-
-  // First, we update the currency in case it's out of date
-  const currencyHandler = new CurrencyHandler(connection)
-  await currencyHandler.setCurrencyTable()
-
-  // Now let's fetch the registrar data...
-  const registrarHandler = new RegistrarHandler(connection)
-  await registrarHandler.getRegistrarTable()
-
-  // ...and the extension data
-  const extensionHandler = new ExtensionHandler(connection)
-  await extensionHandler.getExtensionsTable()
+  let shouldUpdateCurrencyTable = true
 
   // Now we can start with scraping
   const scrapers = {
@@ -39,22 +21,22 @@ const One01DomainScrapingHandler = require('./src/handlers/scrapers/101DomainScr
 
   for (const [registrarName, ScraperClass] of Object.entries(scrapers)) {
     // Initialize a version of the ExtensionPricingHandler for this scraper
-    const extensionPricingHandler = new ExtensionPricingHandler(
-      registrarName,
-      connection,
-      currencyHandler,
-      registrarHandler,
-      extensionHandler
-    )
+    const extensionPricingHandler = new ExtensionPricingHandler(registrarName)
 
     // Then initialize the scraper
-    const scraper = new ScraperClass(extensionPricingHandler)
+    const scraper = new ScraperClass(
+      extensionPricingHandler,
+      shouldUpdateCurrencyTable
+    )
 
     console.log(`Beginning scrape: ${registrarName}`)
 
     // And scrape
     try {
       await scraper.setPricingData()
+
+      // Don't update the currency table after the first scrape
+      shouldUpdateCurrencyTable = false
     } catch (e) {
       console.log(`Scraping aborted: ${registrarName}`)
       console.log(e.message + '\n')
@@ -66,9 +48,6 @@ const One01DomainScrapingHandler = require('./src/handlers/scrapers/101DomainScr
 
     console.log(`Scrape finished: ${registrarName}\n`)
   }
-
-  // Close the DB connection, since we're done
-  connection.end()
 
   // Now we can deploy the front end
   const frontEndDeploymentHandler = new FrontEndDeploymentHandler()

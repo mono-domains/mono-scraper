@@ -4,10 +4,12 @@ const CurrencyHelper = require('../helpers/CurrencyHelper')
 
 class CurrencyHandler {
   db = null
-  currencyTable = []
+  currencyTable = {}
+  shouldUpdateCurrencyTable = true
 
-  constructor(connection) {
+  constructor(connection, shouldUpdateCurrencyTable) {
     this.db = connection
+    this.shouldUpdateCurrencyTable = shouldUpdateCurrencyTable
   }
 
   async setCurrencyTable() {
@@ -34,6 +36,11 @@ class CurrencyHandler {
       this.currencyTable = currencyTable
 
       // We don't need to do anything further here
+      return
+    }
+
+    // If we don't need to update the currency table, just skip the next part
+    if (!this.shouldUpdateCurrencyTable) {
       return
     }
 
@@ -71,7 +78,12 @@ class CurrencyHandler {
     console.log(`${affectedRows} currencies updated\n`)
   }
 
-  convertToUSD(price) {
+  async convertToUSD(price) {
+    // If the currency table isn't already set, set it
+    if (!Object.keys(this.currencyTable).length) {
+      await this.setCurrencyTable()
+    }
+
     // The passed price here will be a string including the symbol
     // So we first need to identify the currency being used
     const currencyHelper = new CurrencyHelper()
