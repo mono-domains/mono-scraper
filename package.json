@@ -4,7 +4,7 @@
     "cheerio": "^1.0.0-rc.12",
     "dotenv": "^16.0.3",
     "minimist": "^1.2.8",
-    "mysql2": "^3.2.0",
+    "mysql2": "^3.9.8",
     "node-ssh": "^13.0.1",
     "playwright": "^1.31.2",
     "punycode": "^2.3.0"
