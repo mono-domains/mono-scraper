@@ -1,5 +1,7 @@
 require('dotenv').config({ path: `${__dirname}/.env` })
 
+const DatabaseConnection = require('./src/connections/DatabaseConnection')
+
 const ExtensionPricingHandler = require('./src/handlers/ExtensionPricingHandler')
 const FrontEndDeploymentHandler = require('./src/handlers/FrontEndDeploymentHandler')
 
@@ -9,6 +11,10 @@ const NamecheapScrapingHandler = require('./src/handlers/scrapers/NamecheapScrap
 const One01DomainScrapingHandler = require('./src/handlers/scrapers/101DomainScrapingHandler')
 
 ;(async () => {
+  const db = new DatabaseConnection()
+  await db.createConnection()
+  await db.closeConnection()
+
   let shouldUpdateCurrencyTable = true
 
   // Now we can start with scraping
